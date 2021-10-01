@@ -67,7 +67,7 @@ public class VerificationCodeAuthenticator extends BaseDirectGrantAuthenticator 
         String phoneNumber = Optional.ofNullable(context.getHttpRequest().getDecodedFormParameters().getFirst("phone_number")).orElse(
                 context.getHttpRequest().getDecodedFormParameters().getFirst("phoneNumber"));
         String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
-        String kind = null;
+        String kind = "";
         AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
         if (authenticatorConfig != null && authenticatorConfig.getConfig() != null) {
             kind = Optional.ofNullable(context.getAuthenticatorConfig().getConfig().get(KIND)).orElse("");

@@ -8,6 +8,7 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.cache.NoCache;
 import com.hfx.keycloak.VerificationCodeRepresentation;
 import com.hfx.keycloak.spi.VerificationCodeService;
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.spi.UnauthorizedException;
 import org.keycloak.common.ClientConnection;
@@ -68,9 +69,13 @@ public class VerificationCodeResource {
     @Path("")
     @NoCache
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createVerificationCode(@Context HttpRequest request, final MultivaluedMap<String, String> formData) {
+    public Response createVerificationCode(@Context HttpRequest request, final Map<String, String> formData0) {
         String captchaKey = session.getContext().getRealm().getAttribute(CAPTCHA_KEY);
         String captchaSecret = session.getContext().getRealm().getAttribute(CAPTCHA_SECRET);
+
+        MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
+        formData0.forEach(formData::putSingle);
+
         if (StringUtils.isNotEmpty(captchaKey) && StringUtils.isNotEmpty(captchaSecret)) {
             if (!session.getProvider(CaptchaService.class).verify(captchaKey, captchaSecret, formData)) {
                 throw new UnauthorizedException("Captcha validation is required");
