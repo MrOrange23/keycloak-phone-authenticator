@@ -1,3 +1,2 @@
 com.hfx.keycloak.rest.VerificationCodeResourceProviderFactory
 com.hfx.keycloak.rest.RecaptchaResourceProviderFactory
-com.hfx.keycloak.services.PhoneAccountFormServiceProviderFactory

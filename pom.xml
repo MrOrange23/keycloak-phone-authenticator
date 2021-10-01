@@ -15,8 +15,8 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <version.keycloak>13.0.1</version.keycloak>
-    <jboss.logging.version>3.3.2.Final</jboss.logging.version>
+    <version.keycloak>15.0.2</version.keycloak>
+    <jboss.logging.version>3.4.1.Final</jboss.logging.version>
   </properties>
 
   <dependencies>
