@@ -3,6 +3,8 @@ package com.hfx.keycloak.rest;
 import com.hfx.keycloak.SmsException;
 import com.hfx.keycloak.spi.CaptchaService;
 import com.hfx.keycloak.spi.SmsService;
+import java.util.regex.Pattern;
+import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.cache.NoCache;
@@ -17,6 +19,7 @@ import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
@@ -37,6 +40,8 @@ public class VerificationCodeResource {
 
     public static final String CAPTCHA_KEY = "com.hfx.CAPTCHA_KEY";
     public static final String CAPTCHA_SECRET = "com.hfx.CAPTCHA_SECRET";
+
+    private static final Pattern E164_STANDARD_REGEX = Pattern.compile("^\\+?[1-9]\\d{1,14}$");
 
     private final KeycloakSession session;
 
@@ -80,6 +85,20 @@ public class VerificationCodeResource {
             if (!session.getProvider(CaptchaService.class).verify(captchaKey, captchaSecret, formData)) {
                 throw new UnauthorizedException("Captcha validation is required");
             }
+        }
+
+        // Check that provided phone number is valid
+        String phoneNumber = formData.getFirst("phoneNumber");
+        if (!isValidPhoneNumber(phoneNumber)) {
+            throw new BadRequestException("Provided phone number is invalid");
+        }
+
+        // check that user with provided phone number exist
+        List<UserModel> users = session.users().searchForUserByUserAttribute("phoneNumber",
+            phoneNumber, session.getContext().getRealm());
+
+        if (users == null || users.isEmpty()) {
+            throw new NotFoundException("Not found user for given phoneNumber " + phoneNumber);
         }
 
         VerificationCodeRepresentation rep = new VerificationCodeRepresentation();
@@ -138,6 +157,16 @@ public class VerificationCodeResource {
         }
 
         return auth;
+    }
+
+    /**
+     * Check {@code phoneNumber} is valid according to E.164 standart
+     * @param phoneNumber phone number
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/E.164">https://en.wikipedia.org/wiki/E.164</a>
+     */
+    private static boolean isValidPhoneNumber(String phoneNumber) {
+        return E164_STANDARD_REGEX.matcher(phoneNumber).matches();
     }
 
 }
